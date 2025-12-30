@@ -1,0 +1,3 @@
+UPDATE video
+SET thumbnail_url = REPLACE(thumbnail_url, 'default.jpg', 'hqdefault.jpg')
+WHERE thumbnail_url LIKE '%default.jpg';

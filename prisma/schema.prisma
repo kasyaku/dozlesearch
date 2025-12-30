@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Video {
+  id            String       @id
+  title         String
+  description   String?
+  published_at  DateTime
+  thumbnail_url String?
+  video_type    String
+  channel_id    String
+  created_at    DateTime     @default(now())
+  duration_seconds Int?        // 🔹 再生時間（秒）を追加
+
+  edits         TagEdit[]    @relation("VideoToTagEdit")
+  videoTags     VideoTag[]   @relation("VideoToVideoTag")
+  stats         video_stat[] @relation("VideoToVideoStat")
+
+  @@index([published_at])
+  @@index([video_type])
+  @@index([channel_id])
+  @@map("video")
+}
+
+model video_stat {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  video_id      String
+  timestamp     DateTime
+  view_count    Int
+  like_count    Int?
+  comment_count Int?
+  video         Video    @relation("VideoToVideoStat", fields: [video_id], references: [id])
+
+  @@index([video_id])
+  @@index([timestamp])
+  @@map("video_stat")
+}
+
+model Tag {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  icon        String?
+  icon_alt    String?
+  category    TagCategory?
+  edits       TagEdit[]  @relation("TagToTagEdit")
+  videos      VideoTag[] @relation("TagToVideoTag")
+}
+
+enum TagCategory {
+  出演
+  ジャンル
+  形式
+  内容
+  その他
+}
+
+model VideoTag {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  video_id String
+  tag_id   String
+  current  Boolean @default(true)
+  tag      Tag     @relation("TagToVideoTag", fields: [tag_id], references: [id])
+  video    Video   @relation("VideoToVideoTag", fields: [video_id], references: [id])
+
+  @@index([video_id])
+  @@index([tag_id])
+}
+
+model TagEdit {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  video_id     String
+  tag_id       String
+  user_id      String?
+  action       TagAction
+  timestamp    DateTime  @default(now())
+  ip_address   String?
+  anonymous_id String?
+  tag          Tag       @relation("TagToTagEdit", fields: [tag_id], references: [id])
+  user         User?     @relation("UserToTagEdit", fields: [user_id], references: [id])
+  video        Video     @relation("VideoToTagEdit", fields: [video_id], references: [id])
+
+  @@index([video_id])
+  @@index([timestamp])
+}
+
+model User {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username   String
+  email      String?
+  role       String    @default("editor")
+  created_at DateTime  @default(now())
+  last_login DateTime?
+  edits      TagEdit[] @relation("UserToTagEdit")
+}
+
+enum TagAction {
+  add
+  remove
+}
