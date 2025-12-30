@@ -27,13 +27,21 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         videoTags: {
           some: {
             tag: {
-              name: { contains: tag, mode: "insensitive" },
+              is: {
+                name: {
+                  contains: tag,
+                  mode: "insensitive" as const,
+                },
+              },
             },
           },
         },
       })),
       ...keywordList.map((kw) => ({
-        title: { contains: kw, mode: "insensitive" },
+        title: {
+          contains: kw,
+          mode: "insensitive" as const,
+        },
       })),
     ],
   };
