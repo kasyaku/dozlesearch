@@ -25,14 +25,20 @@ export default async function handler(
           some: {
             tag: {
               is: {
-                name: { contains: tag, mode: "insensitive" },
+                name: {
+                  contains: tag,
+                  mode: "insensitive" as const,
+                },
               },
             },
           },
         },
       })),
       ...keywordList.map((kw) => ({
-        title: { contains: kw, mode: "insensitive" },
+        title: {
+          contains: kw,
+          mode: "insensitive" as const,
+        },
       })),
     ],
   };
