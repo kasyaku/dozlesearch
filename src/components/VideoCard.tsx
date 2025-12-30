@@ -1,7 +1,7 @@
 // components/VideoCard.tsx
 import Link from "next/link";
 import { formatDistanceToNow, format } from "date-fns";
-import ja from "date-fns/locale/ja";
+import { ja } from "date-fns/locale";
 
 export default function VideoCard({ video }: { video: any }) {
   const publishedDate = new Date(video.published_at);
