@@ -40,26 +40,35 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const videos = await prisma.video.findMany({
     where,
-    include: {
-      videoTags: {
-        where: { current: true },
-        include: { tag: true },
-      },
-    },
     orderBy: { published_at: "desc" },
     take: 48,
     select: {
       id: true,
       title: true,
       thumbnail_url: true,
-      view_count: true,
       published_at: true,
       created_at: true,
       video_type: true,
       duration_seconds: true,
+      stats: {
+        orderBy: { timestamp: "desc" },
+        take: 1,
+        select: {
+          view_count: true,
+          like_count: true,
+          comment_count: true,
+        },
+      },
       videoTags: {
         where: { current: true },
-        include: { tag: true },
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       },
     },
   });

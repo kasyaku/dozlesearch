@@ -11,10 +11,31 @@ export const getServerSideProps: GetServerSideProps = async () => {
     where: { published_at: { lte: new Date() } },
     orderBy: { published_at: "desc" },
     take: 96,
-    include: {
+    select: {
+      id: true,
+      title: true,
+      thumbnail_url: true,
+      published_at: true,
+      created_at: true,
+      video_type: true,
+      duration_seconds: true,
+      stats: {
+        orderBy: { timestamp: "desc" },
+        take: 1,
+        select: {
+          view_count: true,
+        },
+      },
       videoTags: {
         where: { current: true },
-        include: { tag: true },
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       },
     },
   });
@@ -46,20 +67,28 @@ export default function Home({ videos }) {
   const [allVideos, setAllVideos] = useState(videos);
   const [offset, setOffset] = useState(videos.length);
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
 
   const filteredVideos = allVideos.filter((v) => filters.has(v.video_type));
 
   const loadMore = async () => {
-    if (loading) return;
+    if (loading || !hasMore) return;
     setLoading(true);
     const res = await fetch(`/api/videos?offset=${offset}&limit=24`);
     const newVideos = await res.json();
-    setAllVideos((prev) => [...prev, ...newVideos]);
-    setOffset((prev) => prev + newVideos.length);
+
+    if (newVideos.length === 0) {
+      setHasMore(false); // ← これで止まる！
+    } else {
+      setAllVideos((prev) => [...prev, ...newVideos]);
+      setOffset((prev) => prev + newVideos.length);
+    }
+
     setLoading(false);
   };
 
+  // スクロール監視用
   useEffect(() => {
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
@@ -71,6 +100,15 @@ export default function Home({ videos }) {
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [sentinelRef.current, offset, loading]);
+
+  // トグルが全オフのときに読み込みを止める
+  useEffect(() => {
+    if (filters.size === 0) {
+      setHasMore(false);
+    } else {
+      setHasMore(true);
+    }
+  }, [filters]);
 
   return (
     <main style={{ padding: "2rem" }}>
@@ -108,6 +146,11 @@ export default function Home({ videos }) {
         ))}
       </div>
       <div ref={sentinelRef} style={{ height: "1px" }} />
+      {!hasMore && (
+        <p style={{ textAlign: "center", marginTop: "1rem", color: "#666" }}>
+          これ以上の動画はありません。
+        </p>
+      )}
     </main>
   );
 }

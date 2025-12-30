@@ -17,6 +17,9 @@ export default function VideoCard({ video }: { video: any }) {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
   console.log("duration_seconds:", video.duration_seconds);
+  console.log("video:", video);
+  console.log("video.stats:", video.stats);
+
   return (
     <div style={{ border: "1px solid #ccc", padding: "1rem" }}>
       <Link href={`/videos/${video.id}`}>
@@ -45,7 +48,7 @@ export default function VideoCard({ video }: { video: any }) {
       {/* 再生数・投稿日時・再生時間 */}
       <div style={{ fontSize: "0.85rem", color: "#666", margin: "0.5rem 0" }}>
         <span style={{ marginRight: "1rem" }}>
-          👁 {video.view_count?.toLocaleString() ?? "0"} 回視聴
+          👁 {(video.stats?.[0]?.view_count ?? 0).toLocaleString()} 回視聴
         </span>
         <span style={{ marginRight: "1rem" }}>
           📅 {formattedDate}（{relativeDate}）
