@@ -1,4 +1,7 @@
 //dozul-fan-search\src\pages\admin\videos\[id].tsx
+export const config = {
+  runtime: "nodejs",
+};
 import React, { useState } from "react";
 import { GetServerSideProps } from "next";
 import Link from "next/link";

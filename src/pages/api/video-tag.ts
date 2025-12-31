@@ -1,10 +1,16 @@
 // pages/api/video-tag.ts
+export const config = {
+  runtime: "nodejs",
+};
 import { prisma } from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const ADMIN_USER_ID = "52c69e0e-c342-42da-bd47-05c833a0ecf8"; // Supabaseで確認したUUID
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   try {
     const { videoId, tagId } = req.body;
     if (!videoId || !tagId) {
@@ -19,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           current: true,
         },
       });
-      
+
       await prisma.tagEdit.create({
         data: {
           video_id: videoId,
@@ -28,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           action: req.method === "POST" ? "add" : "remove",
         },
       });
-      
+
       return res.status(200).json({ success: true });
     }
 

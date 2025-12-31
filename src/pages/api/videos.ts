@@ -1,4 +1,7 @@
 // pages/api/videos.ts
+export const config = {
+  runtime: "nodejs",
+};
 import { prisma } from "@/lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
 
